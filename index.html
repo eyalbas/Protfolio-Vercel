@@ -101,11 +101,11 @@
 
     const $ = id => document.getElementById(id);
     const els = { form:$('holdingForm'), apiKey:$('apiKey'), status:$('status'), body:$('holdingsBody'), brokerCards:$('brokerCards'), totalValue:$('totalValue'), dayChange:$('dayChange'), dayPct:$('dayPct'), gainValue:$('gainValue'), gainPct:$('gainPct'), positionsCount:$('positionsCount'), brokersCount:$('brokersCount'), refreshBtn:$('refreshBtn'), clearBtn:$('clearBtn'), usdIls:$('usdIls'), themeToggle:$('themeToggle'), email:$('email'), password:$('password'), signInBtn:$('signInBtn'), signUpBtn:$('signUpBtn'), signOutBtn:$('signOutBtn'), authState:$('authState') };
-    const fxRate = () => Number(els.usdIls.value || 3.7);
+    const getFxRate = () => Number(els.usdIls.value || 3.7);
     const money = (v,c='ILS') => new Intl.NumberFormat('en-US',{style:'currency',currency:c,maximumFractionDigits:2}).format(v || 0);
     const pct = v => `${(v || 0).toFixed(2)}%`;
     const cls = v => v > 0 ? 'positive' : v < 0 ? 'negative' : 'neutral';
-    const rate = c => c === 'USD' ? fxRate() : 1;
+    const rate = c => c === 'USD' ? getFxRate() : 1;
     const eodhdSymbol = (symbol, exchange) => `${String(symbol).trim().toUpperCase()}.${exchange === 'TASE' ? 'TA' : 'US'}`;
     const priceFactor = h => h.exchange === 'TASE' ? 0.01 : 1;
     function brokerColor(name){
