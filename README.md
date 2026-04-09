@@ -1,15 +1,17 @@
 
-# Portfolio - Vercel
+# Your Portfolio - Vercel Ready
+
+## ✅ FIXED
+- fetch("/.netlify/functions/quotes") → fetch("/api/quotes")
+- Full dashboard from index-2.html [file:849]
+- Firebase auth/firestore works
 
 ## Deploy
-1. Upload ZIP to Vercel or connect GitHub
-2. API at /api/quotes
-3. Static at /
+1. Upload ZIP to vercel.com/import
+2. Done!
 
-## Files
-- vercel.json - routing
-- api/quotes.js - serverless API [file:744]
-- index.html - app [file:849]
+## Paths
+- / → index.html (your app)
+- /api/quotes → serverless API [file:744]
 
-## Usage
-fetch("/api/quotes", {method: "POST", body: JSON.stringify({items: [...]})
+Replace Firebase config in index.html with yours.
