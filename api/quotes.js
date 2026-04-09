@@ -15,6 +15,7 @@ export default async function handler(req, res) {
 
   try {
     const body = JSON.parse(req.body || "{}");
+    const apiKey = body.apiKey || '';
     const items = Array.isArray(body.items) ? body.items : [];
 
     async function yahooQuote(symbol, exchange) {
