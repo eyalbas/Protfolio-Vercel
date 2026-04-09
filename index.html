@@ -170,7 +170,6 @@
         if (!response.ok) throw new Error(data.error || 'Quote request failed');
         if (data.fx && data.fx.ok && data.fx.currentPrice) { els.usdIls.value = data.fx.currentPrice.toFixed(4);}
         let okCount = 0;
-        let okCount = 0;
         await Promise.all(data.results.map(async result => {
           if (!result.ok) return;
           const matchingHoldings = holdings.filter(h => h.symbol === result.symbol && h.exchange === result.exchange);
