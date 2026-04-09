@@ -167,7 +167,7 @@
       try {
         const response = await fetch('/api/quotes', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ apiKey: els.apiKey.value.trim(), items: holdings.map(h => ({ symbol:h.symbol, exchange:h.exchange })) }) });
         const data = await response.json();
-        if (data.fx && data.fx.ok && data.fx.currentPrice) { els.usdIls.value = data.fx.currentPrice.toFixed(4); }
+        if (data.fx && data.fx.ok && data.fx.currentPrice) { els.usdIls.value = data.fx.currentPrice.toFixed(4); render();}
         if (!response.ok) throw new Error(data.error || 'Quote request failed');
         if (data.fx && data.fx.ok && data.fx.currentPrice) { els.usdIls.value = data.fx.currentPrice.toFixed(4);}
         let okCount = 0;
