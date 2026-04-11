@@ -160,28 +160,72 @@
 
     els.clearBtn.addEventListener('click', async ()=>{ if (!currentUser) return; await clearAllHoldings(); els.status.textContent='All holdings cleared.'; });
     els.refreshBtn.addEventListener('click', async () => {
-      if (!currentUser) { els.status.textContent = 'Sign in first.'; return; }
-      if (!holdings.length) { els.status.textContent = 'Add at least one holding first.'; return; }
-      els.status.textContent = 'Refreshing quotes via Netlify function...';
+      if (!currentUser) {
+        els.status.textContent = 'Sign in first.';
+        return;
+      }
+      if (!holdings.length) {
+        els.status.textContent = 'Add at least one holding first.';
+        return;
+      }
+    
+      els.status.textContent = 'Refreshing quotes...';
+    
       try {
-        const response = await fetch('/api/quotes', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ apiKey: els.apiKey.value.trim(), items: holdings.map(h => ({ symbol:h.symbol, exchange:h.exchange })) }) });
+        const response = await fetch('/.netlify/functions/quotes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            items: holdings.map(h => ({
+              symbol: h.symbol,
+              exchange: h.exchange
+            }))
+          })
+        });
+    
         const data = await response.json();
-        if (data.fx && data.fx.ok && data.fx.currentPrice) { els.usdIls.value = data.fx.currentPrice.toFixed(4); render();}
         if (!response.ok) throw new Error(data.error || 'Quote request failed');
-        if (data.fx && data.fx.ok && data.fx.currentPrice) { els.usdIls.value = data.fx.currentPrice.toFixed(4);}
+    
         let okCount = 0;
+    
         await Promise.all(data.results.map(async result => {
           if (!result.ok) return;
-          const matchingHoldings = holdings.filter(h => h.symbol === result.symbol && h.exchange === result.exchange);
+    
+          const matchingHoldings = holdings.filter(
+            h => h.symbol === result.symbol && h.exchange === result.exchange
+          );
+    
           await Promise.all(matchingHoldings.map(async holding => {
-            await setDoc(doc(db, 'users', currentUser.uid, 'holdings', holding.id), { ...holding, currentPrice: result.currentPrice, previousClose: result.previousClose ?? result.currentPrice, timestamp: result.timestamp || null, currency: holding.currency || result.currency }, { merge: true });
-            okCount += 1;
+            await setDoc(
+              doc(db, 'users', currentUser.uid, 'holdings', holding.id),
+              {
+                ...holding,
+                currentPrice: result.currentPrice,
+                previousClose: result.previousClose ?? result.currentPrice,
+                timestamp: result.timestamp ?? null,
+                currency: holding.currency || result.currency
+              },
+              { merge: true }
+            );
           }));
+    
+          okCount += 1;
         }));
-        if (data.fx && data.fx.rate) els.usdIls.value = Number(data.fx.rate).toFixed(4);
+    
+        if (data.fx && data.fx.rate) {
+          els.usdIls.value = Number(data.fx.rate).toFixed(4);
+        }
+    
         const failures = data.results.filter(r => !r.ok);
-        const fxText = data.fx && data.fx.rate ? ` USD/ILS: ${Number(data.fx.rate).toFixed(4)}.` : data.fx && data.fx.error ? ` USD/ILS failed: ${data.fx.error}.` : '';
-        els.status.textContent = failures.length ? `Refreshed ${okCount} holding(s). Failed: ${failures.map(f => `${f.symbol} as ${f.eodhdSymbol} (${f.error})`).join('; ')}.${fxText}` : `Refreshed ${okCount} holding(s) from Yahoo.${fxText}`;
+        const fxText = data.fx && data.fx.rate
+          ? ` USDILS ${Number(data.fx.rate).toFixed(4)}.`
+          : (data.fx && data.fx.error ? ` USDILS failed: ${data.fx.error}.` : '');
+    
+        els.status.textContent = failures.length
+          ? `Refreshed ${okCount} holdings. Failed: ${failures.map(f => f.symbol || f.eodhdSymbol).join(', ')}.${fxText}`
+          : `Refreshed ${okCount} holdings from Yahoo.${fxText}`;
+    
+        render();
       } catch (error) {
         els.status.textContent = `Refresh failed: ${error.message}`;
       }
